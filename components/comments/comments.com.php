@@ -38,7 +38,7 @@ class EXT_COM_Comments extends SYS_Component
 			{
 				$this->comments->type   = $type;
 				$this->comments->rel_id = $rel_id;
-				
+
 				$id = $this->comments->insert();
 				
 				hlp::redirect("#comment_{$id}");
@@ -88,15 +88,15 @@ class EXT_COM_Comments extends SYS_Component
 	
 	//--------------------------------------------------------------------------
 	
-	function act_delete($id)
-	{
-		if (! $this->comments->is_manager($this->user->id)) return sys::error_404();
+	// function act_delete($id)
+	// {
+	// 	if (! $this->comments->is_manager($this->user->id)) return sys::error_404();
 		
-		$this->db->where('id=?', $id)->update($this->comments->table, array('status'=>0));
+	// 	$this->db->where('id=?', $id)->update($this->comments->table, array('status'=>0));
 		
-		hlp::redirect_back();
-		$this->view = FALSE;
-	}
+	// 	hlp::redirect_back();
+	// 	$this->view = FALSE;
+	// }
 	
 	//--------------------------------------------------------------------------
 

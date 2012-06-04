@@ -12,6 +12,9 @@ class EXT_Comments extends SYS_Model_Database
 	public $allow_guest        = FALSE; // Гости могут добавлять комментарий
 	public $auto_registration  = FALSE; // Автоматически регистрировать пользователей оставивших комментарий
 	public $post_delay         = 180;   // 3 min
+	// public $allow_reply        = TRUE;  // Разершить отвечать на комментарии (древовидная стр-ра)
+	public $mailing            = array();
+	// public $manager_ids        = array(); // Идентификаторы менеджеров
 	
 	//--------------------------------------------------------------------------
 	
@@ -25,7 +28,7 @@ class EXT_Comments extends SYS_Model_Database
 	{
 		parent::__construct();
 		
-		sys::set_config_items(&$this, 'comments');
+		sys::set_config_items($this, 'comments');
 	}
 	
 	//--------------------------------------------------------------------------
@@ -34,6 +37,7 @@ class EXT_Comments extends SYS_Model_Database
 	{
 		$this->fields['comments'] = array(
 			'id'   => array(),
+			'pid'  => array(),
 			'uid'  => array(
 				'default' => $this->user->id
 			),
@@ -216,7 +220,12 @@ class EXT_Comments extends SYS_Model_Database
 		$_POST['type']   = $this->type;
 		$_POST['rel_id'] = $this->rel_id;
 		
-		return parent::insert();
+		$insert_id = parent::insert();
+		// $insert_id = 19;
+
+		$this->mail_process($insert_id);
+
+		return $insert_id;
 	}
 	
 	//--------------------------------------------------------------------------
@@ -247,20 +256,63 @@ class EXT_Comments extends SYS_Model_Database
 			
 		return $resutl[$key];
 	}
+
+	//--------------------------------------------------------------------------
+
+	public function mail_process($comment_id)
+	{
+		if (empty($this->mailing[$this->type]) || ! $this->rel_id) return;
+
+		$mailing   = $this->mailing[$this->type];
+		$template  = $mailing['template'];
+
+		// GET DATA
+		$model =& $this->load->model($this->type);
+		$this->db->where($model->table . '.id=?', $this->rel_id);
+		$data = $model->get_row();
+
+		if ( ! $data || empty($data->uid) || $data->uid == sys::$ext->user->id)
+		{
+			return;
+		}
+
+		$this->load->library('Mail');
+		
+		$full_link = $this->mail->base_url . $this->uri->uri_string . '/#comment_' . $comment_id;
+
+		// GET COMMENT DATA
+		// $this->db->where($this->table . '.id=?', $comment_id);
+		// $comment = $this->get_row();
+
+		// Mail data
+		// $email_data['comment']    =& $comment;
+		$email_data['full_link']  =& $full_link;
+		$email_data['data']       =& $data;
+		$email_data['comment_id'] =& $comment_id;
+		$email_data['mailing']    =& $mailing;
+
+		// SEND
+		// $this->mail->debug       = TRUE;
+		// $this->mail->debug_email = FALSE;
+		// echo "<hr>";
+		$this->mail->send_to_user($data->uid, $template, $email_data);
+
+		// die('<hr>mail_process');
+	}
 	
 	//--------------------------------------------------------------------------
 	
-	public function is_manager($uid = NULL)
-	{
-		if ( ! $uid)
-		{
-			$uid = sys::$ext->user->id;
-		}
+	// public function is_manager($uid = NULL)
+	// {
+	// 	if ( ! $uid)
+	// 	{
+	// 		$uid = sys::$ext->user->id;
+	// 	}
 		
-		if ( ! $uid) return FALSE;
+	// 	if ( ! $uid) return FALSE;
 		
-		return sys::$ext->user->group_id == 1 || in_array($uid, $this->manager_ids);
-	}
+	// 	return sys::$ext->user->group_id == 1 || in_array($uid, $this->manager_ids);
+	// }
 	
 	//--------------------------------------------------------------------------
 }
