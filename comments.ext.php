@@ -64,7 +64,7 @@ class EXT_Comments extends SYS_Model_Database
 				'default' => time(),
 			),
 			'ip' => array(
-				'default' => ip2long($_SERVER['REMOTE_ADDR'])
+				'default' => isset($_SERVER['REMOTE_ADDR']) ? ip2long($_SERVER['REMOTE_ADDR']) : 0
 			),
 			/*'username' => array(
 				'label' => 'Имя (для гостя)',
