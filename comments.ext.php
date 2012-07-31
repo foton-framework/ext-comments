@@ -6,12 +6,16 @@ class EXT_Comments extends SYS_Model_Database
 {
 	//--------------------------------------------------------------------------
 	
+	public $per_page           = 50;    // Кол-во комментариев на страницу
+	public $tree_mode          = TRUE;  // Включить древовидный режим. (кол-во уровней+1)
+	public $mailing_author     = TRUE;  // Оповещать автора коммента об ответе
 	public $captcha_protection = TRUE;  // Защита от спама каптчей
 	public $code_protection    = FALSE; // Защита от спама скрытым кодом
 	public $js_validation      = FALSE; // Проверка формы до отправления
 	public $allow_guest        = FALSE; // Гости могут добавлять комментарий
 	public $auto_registration  = FALSE; // Автоматически регистрировать пользователей оставивших комментарий
 	public $post_delay         = 180;   // 3 min
+
 	// public $allow_reply        = TRUE;  // Разершить отвечать на комментарии (древовидная стр-ра)
 	public $mailing            = array();
 	// public $manager_ids        = array(); // Идентификаторы менеджеров
@@ -21,6 +25,8 @@ class EXT_Comments extends SYS_Model_Database
 	public $table  = 'comments';
 	public $type   = '';
 	public $rel_id = 0;
+	public $page   = 1;
+	public $total_pages = 1;
 	
 	//--------------------------------------------------------------------------
 	
@@ -82,6 +88,53 @@ class EXT_Comments extends SYS_Model_Database
 	
 	//--------------------------------------------------------------------------
 	
+	public function get_data()
+	{
+		$result = new stdClass;
+		$result->parents = array();
+		$result->childs  = array();
+
+		// $this->db->where();
+		// $count_all = $this->get_count();
+		
+		$count_parents = $this->get_count(NULL,NULL,$this->tree_mode?'pid=0':'');
+
+		if ($count_parents > $this->per_page)
+		{
+			$this->total_pages = floor($count_parents / $this->per_page);
+			$this->db->limit( $this->page*$this->per_page, ($this->page-1)*$this->per_page );
+			// $this->load->library('pagination');
+			// $this->pagination->set_group('comments');
+			// $this->pagination->init($total, $this->per_page, NULL, 'comments_?.html');
+			// $this->pagination->set_db_limit();
+			// $this->db->limit($this->per_page);
+		}
+
+		// get parents
+		$this->db->where('pid=0');
+		$result->parents = $this->get_result();
+		
+		if ($this->tree_mode && $result->parents)
+		{
+			foreach ($result->parents as $row)
+			{
+				$min_date = isset($min_date) ? min($min_date, $row->postdate) : $row->postdate;
+				// $max_date = isset($max_date) ? max($max_date, $row->postdate) : $row->postdate;
+			}
+
+			$this->db->where('pid>0 AND postdate > ' . $min_date)->order_by('postdate');
+			$childs = $this->get_result();
+			foreach ($childs as $i=>$row)
+			{
+				$result->childs[$row->pid][$row->id] =& $childs[$i];
+			}
+		}
+		
+		return $result;
+	}
+
+	//--------------------------------------------------------------------------
+
 	public function check_permissions()
 	{
 		if ($this->user->id) return TRUE;
@@ -244,12 +297,19 @@ class EXT_Comments extends SYS_Model_Database
 	
 	//--------------------------------------------------------------------------
 	
-	public function get_count($type, $rel_id)
+	public function get_count($type = NULL, $rel_id = NULL, $where = NULL)
 	{
-		static $resutl;
-		$key = $type . $rel_id;
+		static $resutl = array();
+
+		if ($type === NULL)   $type   = $this->type;
+		if ($rel_id === NULL) $rel_id = $this->rel_id;
+
+		$key = $type . $rel_id . $where;
+
 		if (isset($resutl[$key])) return $resutl[$key];
 		
+		if ($where) $this->db->where($where);
+
 		$resutl[$key] = $this->db->select('COUNT(*) AS x')
 			->where('type = ? AND rel_id = ?', $type, $rel_id)
 			->get($this->table)->row()->x;
@@ -299,7 +359,7 @@ class EXT_Comments extends SYS_Model_Database
 
 		// die('<hr>mail_process');
 	}
-	
+
 	//--------------------------------------------------------------------------
 	
 	// public function is_manager($uid = NULL)

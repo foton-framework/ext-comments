@@ -14,21 +14,39 @@ class EXT_COM_Comments extends SYS_Component
 	
 	function get($type, $rel_id = 0)
 	{
-		$this->view = 'list';
+		$this->view = 'get';
 		$this->type = $type;
 		
 		$this->comments->type   = $type;
 		$this->comments->rel_id = $rel_id;
 		
-		$this->data['type']      = $type;
-		$this->data['rel_id']    = $rel_id;
-		$this->data['count_all'] = $this->comments->get_count($type, $rel_id);
-		$this->data['data']      = $this->comments->get_result();
+		$total = $this->comments->get_count();
+		
+
+		$this->data['type']      =& $type;
+		$this->data['rel_id']    =& $rel_id;
+		$this->data['count_all'] =& $total;
+
+		// $this->data['content']   =& $this->content($data, $childs);
 	}
 	
 	//--------------------------------------------------------------------------
-	
-	function form($type, $rel_id = 0)
+		
+	function act_ajax($type, $rel_id, $page)
+	{
+		$this->template->enable = FALSE;
+		$this->view = FALSE;
+
+		$this->comments->type   = $type;
+		$this->comments->rel_id = $rel_id;
+		$this->comments->page   = $page;
+		
+		$this->content($type, $rel_id, $page);
+	}
+
+	//--------------------------------------------------------------------------
+
+	function form()
 	{
 		if ($this->user->id || $this->comments->allow_guest)
 		{
@@ -36,8 +54,8 @@ class EXT_COM_Comments extends SYS_Component
 			
 			if ($this->form->validation() && $this->comments->check_permissions())
 			{
-				$this->comments->type   = $type;
-				$this->comments->rel_id = $rel_id;
+				// $this->comments->type   = $type;
+				// $this->comments->rel_id = $rel_id;
 
 				$id = $this->comments->insert();
 				
@@ -88,6 +106,27 @@ class EXT_COM_Comments extends SYS_Component
 	
 	//--------------------------------------------------------------------------
 	
+	function content($type=NULL, $rel_id=NULL, $page=1)
+	{
+		if ($type)   $this->comments->type   = $type;
+		if ($rel_id) $this->comments->rel_id = $rel_id;
+		if ($page)   $this->comments->page   = $page;
+
+		$data = $this->comments->get_data();
+
+		$this->data['data'] =& $data;
+		$this->view = 'list';
+	}
+
+	//--------------------------------------------------------------------------
+	
+	function script()
+	{
+		
+	}
+
+	//--------------------------------------------------------------------------
+
 	// function act_delete($id)
 	// {
 	// 	if (! $this->comments->is_manager($this->user->id)) return sys::error_404();
