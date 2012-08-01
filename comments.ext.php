@@ -63,7 +63,7 @@ class EXT_Comments extends SYS_Model_Database
 			'message' => array(
 				'label' => 'Сообщение',
 				'field' => 'textarea',
-				'rules' => 'trim|strip_tags|required|min_length[5]',
+				'rules' => 'trim|strip_tags|required|min_length[2]',
 			),
 			'postdate' => array(
 				'label'   => 'Дата публикации',
