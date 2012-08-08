@@ -225,7 +225,7 @@ class EXT_Comments extends SYS_Model_Database
 		
 		if (isset($row->group_id)) $this->user->model->prepare_row_result(&$row);
 
-		$row->profile_url = h_url::url("users/{$row->uid}");
+		// $row->profile_url = h_url::url("users/{$row->uid}");
 		
 		return $row;
 	}
