@@ -274,9 +274,12 @@ class EXT_Comments extends SYS_Model_Database
 		$_POST['rel_id'] = $this->rel_id;
 		
 		$insert_id = parent::insert();
-		// $insert_id = 19;
 
-		$this->mail_process($insert_id);
+		// $insert_id = 19;
+		if ($insert_id)
+		{
+			$this->mail_process($insert_id);
+		}
 
 		return $insert_id;
 	}
