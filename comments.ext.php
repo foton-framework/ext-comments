@@ -63,7 +63,7 @@ class EXT_Comments extends SYS_Model_Database
 			'message' => array(
 				'label' => 'Сообщение',
 				'field' => 'textarea',
-				'rules' => 'trim|strip_tags|required|min_length[2]',
+				'rules' => $this->user->group_id == 1 ? 'trim' : 'trim|strip_tags|required|min_length[2]',
 			),
 			'postdate' => array(
 				'label'   => 'Дата публикации',
@@ -326,11 +326,15 @@ class EXT_Comments extends SYS_Model_Database
 	{
 		if (empty($this->mailing[$this->type]) || ! $this->rel_id) return;
 
-		$mailing   = $this->mailing[$this->type];
-		$template  = $mailing['template'];
+		$mailing    = $this->mailing[$this->type];
+		$template   = $mailing['template'];
+		$model_name = ! empty($mailing['model']) ? $mailing['model'] : $this->type;
+
+		$this->db->where('comments.id=?', $comment_id);
+		$comment = $this->get_row();
 
 		// GET DATA
-		$model =& $this->load->model($this->type);
+		$model =& $this->load->model($model_name);
 		$this->db->where($model->table . '.id=?', $this->rel_id);
 		$data = $model->get_row();
 
@@ -351,6 +355,7 @@ class EXT_Comments extends SYS_Model_Database
 		// $email_data['comment']    =& $comment;
 		$email_data['full_link']  =& $full_link;
 		$email_data['data']       =& $data;
+		$email_data['comment']    =& $comment;
 		$email_data['comment_id'] =& $comment_id;
 		$email_data['mailing']    =& $mailing;
 

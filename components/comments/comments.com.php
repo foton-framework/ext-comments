@@ -31,7 +31,7 @@ class EXT_COM_Comments extends SYS_Component
 	}
 	
 	//--------------------------------------------------------------------------
-		
+	
 	function act_ajax($type, $rel_id, $page)
 	{
 		$this->template->enable = FALSE;
@@ -52,7 +52,7 @@ class EXT_COM_Comments extends SYS_Component
 		{
 			$this->comments->init_form();
 			
-			if ($this->form->validation() && $this->comments->check_permissions())
+			if (isset($_POST['message']) && $this->form->validation() && $this->comments->check_permissions())
 			{
 				// $this->comments->type   = $type;
 				// $this->comments->rel_id = $rel_id;

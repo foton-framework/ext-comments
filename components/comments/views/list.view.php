@@ -26,7 +26,7 @@
 				<span class="postdate"><?=hlp::date($row->postdate) ?></span>
 				
 				<div class="message_content">
-					<?=nl2br($row->message) ?>
+					<?=$row->message ?>
 				</div>
 
 				<? if (sys::$ext->comments->tree_mode): ?>
