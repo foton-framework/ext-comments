@@ -1,3 +1,5 @@
+
+
 <div id="comments_form_js" style="display:none">
 	<?=$this->load->component('comments/form') ?>
 </div>

@@ -1,3 +1,4 @@
+
 <?=$this->load->component('comments/script') ?>
 
 <? if ($count_all): ?>
@@ -9,4 +10,5 @@
 
 <div id="add_comment"></div>
 <hr>
+
 <div id="comment_add"><?=$this->load->component("comments/form/{$type}/{$rel_id}") ?></div>

@@ -51,15 +51,14 @@ class EXT_COM_Comments extends SYS_Component
 		if ($this->user->id || $this->comments->allow_guest)
 		{
 			$this->comments->init_form();
-			
+
 			if (isset($_POST['message']) && $this->form->validation() && $this->comments->check_permissions())
 			{
-				// $this->comments->type   = $type;
-				// $this->comments->rel_id = $rel_id;
-
 				$id = $this->comments->insert();
 				
-				hlp::redirect("#comment_{$id}");
+				unset($_POST['message']);
+
+				hlp::redirect("/{$this->uri->uri_string}/#comment_{$id}");
 			}
 		}
 		else
