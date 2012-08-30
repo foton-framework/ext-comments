@@ -1,6 +1,6 @@
-
 <?=$this->load->component('comments/script') ?>
 
+<hr>
 <? if ($count_all): ?>
 	<b>Комментарии (<?=$count_all ?>)</b>
 	<a class="right" href="#" onclick="return comments_form(this)">Добавить комментарий</a>

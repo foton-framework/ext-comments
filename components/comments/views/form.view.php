@@ -24,7 +24,7 @@
 	
 	<?=h_form::hidden('pid') ?>
 	
-	<button type="submit">Отправить</button>
+	<button type="submit">Добавить комментарий</button>
 
 	<div class="clr"></div>
 		
