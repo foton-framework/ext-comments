@@ -223,7 +223,7 @@ class EXT_Comments extends SYS_Model_Database
 		$row->status_name = $this->status_list($row->status);
 		$row->message     = nl2br($row->message);
 		
-		if (isset($row->group_id)) $this->user->model->prepare_row_result(&$row);
+		if (isset($row->group_id)) $this->user->model->prepare_row_result(&$row, $row->uid);
 
 		// $row->profile_url = h_url::url("users/{$row->uid}");
 		
