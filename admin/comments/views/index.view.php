@@ -6,15 +6,15 @@ var del = 'Удалить коментарий?';
 
 <?=$this->pagination->render() ?>
 
-<table class="data_table">
+<table class="data_table inline_admin_buttons">
 	<tr>
 		<th>ID</th>
-		<th>Рейтинг</th>
+		<th>&star;</th>
 		<th>Сообщение</th>
 		<th>Автор</th>
-		<th>Дата</th>
-		<th>Ссылка</th>
-		<th></th>
+		<th width=130>Дата</th>
+		<th width=150>Ссылка</th>
+		<th width=90></th>
 	</tr>
 	
 	<? $index = 0 ?>
@@ -23,15 +23,30 @@ var del = 'Удалить коментарий?';
 			<td><?=$row->id ?></td>
 			<td style="color:#<?=$row->ratio>0?'0B0':($row->ratio<0?'900':'BBB') ?>"><?=$row->ratio>0?'+':($row->ratio<0?'-':'') ?><?=$row->ratio ?></td>
 			<td><?=$row->message ?></td>
-			<td><?=isset($row->full_name) ? $row->full_name : $row->name ?></td>
+			<td>
+				<? if ($row->email): ?>
+					<a href="<?=$row->profile_url ?>"><?=isset($row->login) ? $row->login : $row->email ?></a>
+				<? else: ?>
+					<span style="color:#666">Гость</span>
+				<? endif ?>
+			</td>
 			<td><?=hlp::date($row->postdate) ?></td>
 			<td>
-				<? $link = "/{$row->type}/" . ($row->rel_id ? "{$row->rel_id}/" : '') ?>
-				<a href="<?=$link . "#comment_{$row->id}" ?>"><?=$link ?></a>
+				<? if (isset($links[$row->type]) && isset($links[$row->type][$row->rel_id])): ?>
+					<? $link = $links[$row->type][$row->rel_id] ?>
+					<? if ( ! $link['link'] || $link['link']{0} != '/'): ?>
+						<?=$link['model'] ?>:<br><?=$link['title'] ?> (<?=$row->rel_id ?>)
+					<? else: ?>
+						<a href="<?=$link['link'] . "#comment_{$row->id}" ?>"><?=$link['model'] ?>:<br><?=$link['title'] ?> (<?=$row->rel_id ?>)</a>
+					<? endif ?>
+				<? else: ?>
+					нет ссылки
+				<? endif ?>
 			</td>
 			<td>
-				<a href="/admin/comments/remove/<?=$row->id ?>/" onclick="return confirm(del)">Удалить</a>
+				<?=$row->admin_buttons ?>
 			</td>
+
 		</tr>
 	<? endforeach ?>	
 </table>
