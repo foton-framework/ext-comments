@@ -45,22 +45,41 @@ class COM_Comments extends SYS_Component
 			$modelclass = MODEL_CLASS_PREFIX . $modelname;
 			$model = $this->load->model($modelname, FALSE);
 
+			if ( ! $model)
+			{
+				$model = sys::call($modelname);
+			}
+
 			if ($model) {
 				$this->db->where_in($model->table . '.id', $ids);
 				$result = $model->get_result();
 
 				foreach ($result as $row)
 				{
-					$links[$modelkey][$row->id]['model'] = isset($model->name) ? $model->name : $modelkey;
-					$links[$modelkey][$row->id]['link'] = isset($row->full_link) ? $row->full_link : 
+					$links[$modelkey][$row->id]['model'] = isset($model->name) ? $model->name : $modelname;
+					$links[$modelkey][$row->id]['url']   = isset($row->full_link) ? $row->full_link : 
 						( isset($row->full_url) ? $row->full_url : FALSE );
-					if ($links[$modelkey][$row->id]['link'])
-					{
-						$links[$modelkey][$row->id]['title'] = isset($row->title) ? $row->title : 
+					$links[$modelkey][$row->id]['title'] = isset($row->title) ? hlp::cut_text($row->title,100) : 
 							( isset($row->name) ? $row->name : FALSE );
-					}
 				}
 			}
+		}
+
+		foreach ($data as $i=>$row)
+		{
+			if (isset($links[$row->type][$row->rel_id]))
+			{
+				$page = $links[$row->type][$row->rel_id];
+				$data[$i]->page_title = $page['title'];
+				$data[$i]->page_model = $page['model'];
+				if ( ! $data[$i]->page_url)
+				{
+					$data[$i]->page_url = $page['url'];
+				}
+			}
+
+			if (empty($data[$i]->page_title)) $data[$i]->page_title = $data[$i]->page_url;
+			if (empty($data[$i]->page_model)) $data[$i]->page_model = $data[$i]->type;
 		}
 
 		$this->data['data']  =& $data;

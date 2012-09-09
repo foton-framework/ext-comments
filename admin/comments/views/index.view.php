@@ -13,6 +13,7 @@ var del = 'Удалить коментарий?';
 		<th>Сообщение</th>
 		<th>Автор</th>
 		<th width=130>Дата</th>
+		<th>Раздел</th>
 		<th width=150>Ссылка</th>
 		<th width=90></th>
 	</tr>
@@ -25,22 +26,18 @@ var del = 'Удалить коментарий?';
 			<td><?=$row->message ?></td>
 			<td>
 				<? if ($row->email): ?>
-					<a href="<?=$row->profile_url ?>"><?=isset($row->login) ? $row->login : $row->email ?></a>
+					<a href="<?=$row->profile_url ?>"><?=$row->full_name ?><br><?=!empty($row->login) ? $row->login : $row->email ?></a>
 				<? else: ?>
 					<span style="color:#666">Гость</span>
 				<? endif ?>
 			</td>
 			<td><?=hlp::date($row->postdate) ?></td>
+			<td><?=$row->page_model ?></td>
 			<td>
-				<? if (isset($links[$row->type]) && isset($links[$row->type][$row->rel_id])): ?>
-					<? $link = $links[$row->type][$row->rel_id] ?>
-					<? if ( ! $link['link'] || $link['link']{0} != '/'): ?>
-						<?=$link['model'] ?>:<br><?=$link['title'] ?> (<?=$row->rel_id ?>)
-					<? else: ?>
-						<a href="<?=$link['link'] . "#comment_{$row->id}" ?>"><?=$link['model'] ?>:<br><?=$link['title'] ?> (<?=$row->rel_id ?>)</a>
-					<? endif ?>
+				<? if ($row->page_url): ?>
+					<a href="<?=$row->page_url ?>#comment_<?=$row->id ?>"><?=$row->page_title ?> &rarr;</a>
 				<? else: ?>
-					нет ссылки
+					<?=$row->page_title ?>
 				<? endif ?>
 			</td>
 			<td>
