@@ -42,7 +42,7 @@ class COM_Comments extends SYS_Component
 				$modelname = $this->comments->model_aliases[$modelname];
 			}
 			if (isset(sys::$model->$modelname)) continue;
-			$modelclass = MODEL_CLASS_PREFIX . $modelname;
+			
 			$model = $this->load->model($modelname, FALSE);
 
 			if ( ! $model)
