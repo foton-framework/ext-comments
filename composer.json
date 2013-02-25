@@ -3,7 +3,9 @@
     "type":    "foton-extension",
     "license":  "MIT",
     "require": {
-    	"foton/installer": "*"
+    	"foton/installer": "*",
+        "foton/framework": "1.*",
+        "foton/user":      "1.*"
     },
     "extra": {
         "branch-alias": {
