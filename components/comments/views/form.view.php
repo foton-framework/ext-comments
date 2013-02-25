@@ -1,4 +1,4 @@
-<?=h_form::open() ?>
+<?=h_form::open(($this->uri->uri_string ? '/' : '')  . "{$this->uri->uri_string}/") ?>
 	
 	<?=$this->form->form_errors() ?>
 

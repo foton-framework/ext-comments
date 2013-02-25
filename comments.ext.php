@@ -82,11 +82,6 @@ class EXT_Comments extends SYS_Model_Database
 				'field' => 'input',
 				'rules' => 'trim|valid_email|max_length[100]',
 			),*/
-			'page_url' => array(
-				'label' => 'URL страницы',
-				'field' => 'input',
-				'default' => $_SERVER['REQUEST_URI']
-			),
 			'ratio' => NULL
 		);
 	}
