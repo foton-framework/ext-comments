@@ -16,9 +16,8 @@ class EXT_Comments extends SYS_Model_Database
 	public $auto_registration  = FALSE; // Автоматически регистрировать пользователей оставивших комментарий
 	public $post_delay         = 180;   // 3 min
 
-	// public $allow_reply        = TRUE;  // Разершить отвечать на комментарии (древовидная стр-ра)
+	// public $allow_reply        = TRUE;  // Разрешить отвечать на комментарии (древовидная стр-ра)
 	public $mailing            = array();
-	// public $manager_ids        = array(); // Идентификаторы менеджеров
 	
 	//--------------------------------------------------------------------------
 	
@@ -93,9 +92,6 @@ class EXT_Comments extends SYS_Model_Database
 		$result = new stdClass;
 		$result->parents = array();
 		$result->childs  = array();
-
-		// $this->db->where();
-		// $count_all = $this->get_count();
 		
 		$count_parents = $this->get_count(NULL,NULL,$this->tree_mode?'pid=0':'');
 
@@ -103,11 +99,6 @@ class EXT_Comments extends SYS_Model_Database
 		{
 			$this->total_pages = floor($count_parents / $this->per_page);
 			$this->db->limit( $this->page*$this->per_page, ($this->page-1)*$this->per_page );
-			// $this->load->library('pagination');
-			// $this->pagination->set_group('comments');
-			// $this->pagination->init($total, $this->per_page, NULL, 'comments_?.html');
-			// $this->pagination->set_db_limit();
-			// $this->db->limit($this->per_page);
 		}
 
 		// get parents
@@ -218,14 +209,10 @@ class EXT_Comments extends SYS_Model_Database
 	{
 		$row = parent::prepare_row_result($row);
 		
-		//if ($row->postdate) $row->postdate = date('d.m.Y - H:i', $row->postdate);
-		
 		$row->status_name = $this->status_list($row->status);
 		$row->message     = nl2br($row->message);
 		
 		if (isset($row->group_id)) $this->user->model->prepare_row_result(&$row, $row->uid);
-
-		// $row->profile_url = h_url::url("users/{$row->uid}");
 		
 		return $row;
 	}
@@ -248,7 +235,7 @@ class EXT_Comments extends SYS_Model_Database
 	
 	public function get()
 	{
-		$this->db->order_by('comments.postdate DESC');
+		$this->db->order_by('comments.postdate DESC, comments.id DESC');
 		
 		if ($this->user->group_id != 1)
 		{
@@ -275,7 +262,6 @@ class EXT_Comments extends SYS_Model_Database
 		
 		$insert_id = parent::insert();
 
-		// $insert_id = 19;
 		if ($insert_id)
 		{
 			$this->mail_process($insert_id);
@@ -302,22 +288,22 @@ class EXT_Comments extends SYS_Model_Database
 	
 	public function get_count($type = NULL, $rel_id = NULL, $where = NULL)
 	{
-		static $resutl = array();
+		static $result = array();
 
 		if ($type === NULL)   $type   = $this->type;
 		if ($rel_id === NULL) $rel_id = $this->rel_id;
 
 		$key = $type . $rel_id . $where;
 
-		if (isset($resutl[$key])) return $resutl[$key];
+		if (isset($result[$key])) return $result[$key];
 		
 		if ($where) $this->db->where($where);
 
-		$resutl[$key] = $this->db->select('COUNT(*) AS x')
+		$result[$key] = $this->db->select('COUNT(*) AS x')
 			->where('type = ? AND rel_id = ?', $type, $rel_id)
 			->get($this->table)->row()->x;
 			
-		return $resutl[$key];
+		return $result[$key];
 	}
 
 	//--------------------------------------------------------------------------
@@ -347,12 +333,7 @@ class EXT_Comments extends SYS_Model_Database
 		
 		$full_link = $this->mail->base_url . $this->uri->uri_string . '/#comment_' . $comment_id;
 
-		// GET COMMENT DATA
-		// $this->db->where($this->table . '.id=?', $comment_id);
-		// $comment = $this->get_row();
-
 		// Mail data
-		// $email_data['comment']    =& $comment;
 		$email_data['full_link']  =& $full_link;
 		$email_data['data']       =& $data;
 		$email_data['comment']    =& $comment;
@@ -369,18 +350,5 @@ class EXT_Comments extends SYS_Model_Database
 	}
 
 	//--------------------------------------------------------------------------
-	
-	// public function is_manager($uid = NULL)
-	// {
-	// 	if ( ! $uid)
-	// 	{
-	// 		$uid = sys::$ext->user->id;
-	// 	}
-		
-	// 	if ( ! $uid) return FALSE;
-		
-	// 	return sys::$ext->user->group_id == 1 || in_array($uid, $this->manager_ids);
-	// }
-	
-	//--------------------------------------------------------------------------
+
 }
